@@ -12,18 +12,18 @@ import ChipContainer from "@/components/ui/chip-container";
 import { careerExperiences } from "@/config/career";
 import { cn } from "@/lib/utils";
 
-interface CareerDetailPageProps {
-  params: {
-    careerId: string;
-  };
-}
-
 // Helper function to extract year from date
 const getYearFromDate = (date: Date): string => {
   return new Date(date).getFullYear().toString();
 };
 
-export default function CareerDetailPage({ params }: CareerDetailPageProps) {
+export default function CareerDetailPage({
+  params,
+  searchParams,
+}: {
+  params: { careerId: string };
+  searchParams?: { [key: string]: string | string[] | undefined };
+}) {
   const career = careerExperiences.find((c) => c.id === params.careerId);
   const [activeTab, setActiveTab] = useState<
     "summary" | "achievements" | "skills"
@@ -65,7 +65,7 @@ export default function CareerDetailPage({ params }: CareerDetailPageProps) {
         transition={{ duration: 0.5 }}
         className="bg-card border border-border rounded-lg p-4 sm:p-6 md:p-8"
       >
-        {/* Date badge at the top of the card */}
+        {/* Date badge */}
         <div className="mb-4 flex justify-center sm:justify-start">
           <div className="inline-flex items-center bg-background border border-primary px-2 py-0.5 rounded-full text-xs font-medium text-primary shadow-sm">
             {typeof career.endDate === "string"
@@ -120,42 +120,23 @@ export default function CareerDetailPage({ params }: CareerDetailPageProps) {
 
         <div className="mt-6 sm:mt-8">
           <div className="flex border-b border-border mb-4 sm:mb-6 overflow-x-auto">
-            <button
-              className={`py-1 sm:py-2 px-2 sm:px-4 font-medium text-xs sm:text-sm relative whitespace-nowrap ${activeTab === "summary" ? "text-primary" : "text-muted-foreground"}`}
-              onClick={() => setActiveTab("summary")}
-            >
-              Summary
-              {activeTab === "summary" && (
-                <motion.div
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
-                  layoutId="activeTabIndicator"
-                />
-              )}
-            </button>
-            <button
-              className={`py-1 sm:py-2 px-2 sm:px-4 font-medium text-xs sm:text-sm relative whitespace-nowrap ${activeTab === "achievements" ? "text-primary" : "text-muted-foreground"}`}
-              onClick={() => setActiveTab("achievements")}
-            >
-              Achievements
-              {activeTab === "achievements" && (
-                <motion.div
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
-                  layoutId="activeTabIndicator"
-                />
-              )}
-            </button>
-            <button
-              className={`py-1 sm:py-2 px-2 sm:px-4 font-medium text-xs sm:text-sm relative whitespace-nowrap ${activeTab === "skills" ? "text-primary" : "text-muted-foreground"}`}
-              onClick={() => setActiveTab("skills")}
-            >
-              Skills
-              {activeTab === "skills" && (
-                <motion.div
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
-                  layoutId="activeTabIndicator"
-                />
-              )}
-            </button>
+            {["summary", "achievements", "skills"].map((tab) => (
+              <button
+                key={tab}
+                className={`py-1 sm:py-2 px-2 sm:px-4 font-medium text-xs sm:text-sm relative whitespace-nowrap ${
+                  activeTab === tab ? "text-primary" : "text-muted-foreground"
+                }`}
+                onClick={() => setActiveTab(tab as typeof activeTab)}
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                {activeTab === tab && (
+                  <motion.div
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
+                    layoutId="activeTabIndicator"
+                  />
+                )}
+              </button>
+            ))}
           </div>
 
           <motion.div
@@ -166,39 +147,35 @@ export default function CareerDetailPage({ params }: CareerDetailPageProps) {
             className="min-h-[200px] sm:min-h-[300px]"
           >
             {activeTab === "summary" && (
-              <div>
-                <ul className="list-disc pl-4 sm:pl-5 md:pl-6 space-y-1 sm:space-y-2 md:space-y-3">
-                  {career.description.map((desc, idx) => (
-                    <motion.li
-                      key={idx}
-                      className="text-xs sm:text-sm md:text-base"
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.3, delay: idx * 0.1 }}
-                    >
-                      {desc}
-                    </motion.li>
-                  ))}
-                </ul>
-              </div>
+              <ul className="list-disc pl-4 sm:pl-5 md:pl-6 space-y-1 sm:space-y-2 md:space-y-3">
+                {career.description.map((desc, idx) => (
+                  <motion.li
+                    key={idx}
+                    className="text-xs sm:text-sm md:text-base"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: idx * 0.1 }}
+                  >
+                    {desc}
+                  </motion.li>
+                ))}
+              </ul>
             )}
 
             {activeTab === "achievements" && (
-              <div>
-                <ul className="list-disc pl-4 sm:pl-5 md:pl-6 space-y-1 sm:space-y-2 md:space-y-3">
-                  {career.achievements.map((achievement, idx) => (
-                    <motion.li
-                      key={idx}
-                      className="text-xs sm:text-sm md:text-base"
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.3, delay: idx * 0.1 }}
-                    >
-                      {achievement}
-                    </motion.li>
-                  ))}
-                </ul>
-              </div>
+              <ul className="list-disc pl-4 sm:pl-5 md:pl-6 space-y-1 sm:space-y-2 md:space-y-3">
+                {career.achievements.map((achievement, idx) => (
+                  <motion.li
+                    key={idx}
+                    className="text-xs sm:text-sm md:text-base"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: idx * 0.1 }}
+                  >
+                    {achievement}
+                  </motion.li>
+                ))}
+              </ul>
             )}
 
             {activeTab === "skills" && (
